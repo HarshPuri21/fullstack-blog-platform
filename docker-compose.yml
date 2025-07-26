@@ -1,1 +1,38 @@
+# docker-compose.yml
+# This file defines and runs the multi-container application.
+
+version: '3.8'
+
+services:
+  # The PostgreSQL Database Service
+  db:
+    image: postgres:14-alpine
+    container_name: blog-db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: blogdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # The Node.js Backend API Service
+  api:
+    container_name: blog-api
+    # Build the image from the Dockerfile in the current directory
+    build: .
+    ports:
+      - "3001:3001"
+    # Set environment variables, including the database URL for Prisma
+    environment:
+      DATABASE_URL: "postgresql://user:password@db:5432/blogdb"
+    # This service depends on the 'db' service to be running first
+    depends_on:
+      - db
+
+# Define a volume for persistent database storage
+volumes:
+  postgres_data:
 
